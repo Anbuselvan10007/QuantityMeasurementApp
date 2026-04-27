@@ -1,6 +1,6 @@
 public class QuantityMeasurementApp {
 
-    // UC6: Addition of Two Length Units (Same Category)
+    // UC7: Addition with Target Unit Specification
     enum Unit {
         FEET(12.0),
         INCH(1.0),
@@ -51,15 +51,29 @@ public class QuantityMeasurementApp {
                                              QuantityMeasurementApp length2) {
         if (length1 == null || length2 == null)
             throw new IllegalArgumentException("Lengths cannot be null");
+        double totalInches = length1.convertToInches() + length2.convertToInches();
+        double resultValue = Math.round((totalInches / length1.unit.getConversionFactor()) * 100.0) / 100.0;
+        return new QuantityMeasurementApp(resultValue, length1.unit);
+    }
 
-        // Convert both to inches (base unit)
+    // UC7: Add two lengths - result in explicitly specified target unit
+    public static QuantityMeasurementApp add(QuantityMeasurementApp length1,
+                                             QuantityMeasurementApp length2,
+                                             Unit targetUnit) {
+        if (length1 == null || length2 == null)
+            throw new IllegalArgumentException("Lengths cannot be null");
+        if (targetUnit == null)
+            throw new IllegalArgumentException("Target unit cannot be null");
+        if (!Double.isFinite(length1.value) || !Double.isFinite(length2.value))
+            throw new IllegalArgumentException("Values must be finite numbers");
+
+        // Convert both to base unit (inches)
         double totalInches = length1.convertToInches() + length2.convertToInches();
 
-        // Convert result back to unit of first operand
-        double resultValue = totalInches / length1.unit.getConversionFactor();
-        resultValue = Math.round(resultValue * 100.0) / 100.0;
+        // Convert to explicitly specified target unit
+        double resultValue = Math.round((totalInches / targetUnit.getConversionFactor()) * 100.0) / 100.0;
 
-        return new QuantityMeasurementApp(resultValue, length1.unit);
+        return new QuantityMeasurementApp(resultValue, targetUnit);
     }
 
     @Override
@@ -71,28 +85,29 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        // 1 foot + 12 inches = 2 feet
         QuantityMeasurementApp feet1 = new QuantityMeasurementApp(1.0, Unit.FEET);
         QuantityMeasurementApp inch12 = new QuantityMeasurementApp(12.0, Unit.INCH);
+
+        // UC6 style - result in unit of first operand (feet)
         QuantityMeasurementApp result1 = add(feet1, inch12);
-        System.out.println("1 feet + 12 inch = " + result1.value + " " + result1.unit); // 2.0 FEET
+        System.out.println("1 feet + 12 inch (default) = "
+                + result1.value + " " + result1.unit);           // 2.0 FEET
 
-        // 1 foot + 1 foot = 2 feet
-        QuantityMeasurementApp feet1b = new QuantityMeasurementApp(1.0, Unit.FEET);
-        QuantityMeasurementApp feet1c = new QuantityMeasurementApp(1.0, Unit.FEET);
-        QuantityMeasurementApp result2 = add(feet1b, feet1c);
-        System.out.println("1 feet + 1 feet = " + result2.value + " " + result2.unit);  // 2.0 FEET
+        // UC7 - result in YARDS (explicit target unit)
+        QuantityMeasurementApp result2 = add(feet1, inch12, Unit.YARD);
+        System.out.println("1 feet + 12 inch in YARDS  = "
+                + result2.value + " " + result2.unit);           // 0.67 YARD
 
-        // 1 yard + 1 foot = 4 feet
+        // UC7 - result in INCHES (explicit target unit)
+        QuantityMeasurementApp result3 = add(feet1, inch12, Unit.INCH);
+        System.out.println("1 feet + 12 inch in INCHES = "
+                + result3.value + " " + result3.unit);           // 24.0 INCH
+
+        // UC7 - 1 yard + 1 foot in CENTIMETERS
         QuantityMeasurementApp yard1 = new QuantityMeasurementApp(1.0, Unit.YARD);
-        QuantityMeasurementApp feet1d = new QuantityMeasurementApp(1.0, Unit.FEET);
-        QuantityMeasurementApp result3 = add(yard1, feet1d);
-        System.out.println("1 yard + 1 feet = " + result3.value + " " + result3.unit);  // 4.0 FEET (in yards = 1.33)
-
-        // 2.54 cm + 2.54 cm = 2 inches
-        QuantityMeasurementApp cm1 = new QuantityMeasurementApp(2.54, Unit.CENTIMETER);
-        QuantityMeasurementApp cm2 = new QuantityMeasurementApp(2.54, Unit.CENTIMETER);
-        QuantityMeasurementApp result4 = add(cm1, cm2);
-        System.out.println("2.54 cm + 2.54 cm = " + result4.value + " " + result4.unit); // 2.0 INCH (in cm)
+        QuantityMeasurementApp feet2 = new QuantityMeasurementApp(1.0, Unit.FEET);
+        QuantityMeasurementApp result4 = add(yard1, feet2, Unit.CENTIMETER);
+        System.out.println("1 yard + 1 feet in CM      = "
+                + result4.value + " " + result4.unit);           // ~121.92 CENTIMETER
     }
 }
