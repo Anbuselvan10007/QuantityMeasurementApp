@@ -1,39 +1,28 @@
 public class QuantityMeasurementApp {
 
-    // UC2: Feet and Inches Measurement Equality
-    enum Unit {
-        FEET(12.0),
-        INCH(1.0);
+    double feet;
 
-        double conversionFactor;
-
-        Unit(double conversionFactor) {
-            this.conversionFactor = conversionFactor;
-        }
+    // Constructor
+    public QuantityMeasurementApp(double feet) {
+        this.feet = feet;
     }
 
-    double value;
-    Unit unit;
-
-    public QuantityMeasurementApp(double value, Unit unit) {
-        this.value = value;
-        this.unit = unit;
-    }
-
-    public double convertToBaseUnit() {
-        return this.value * this.unit.conversionFactor;
-    }
-
-    public boolean equals(QuantityMeasurementApp other) {
-        return this.convertToBaseUnit() == other.convertToBaseUnit();
+    // Compare equality of two feet values
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        QuantityMeasurementApp other = (QuantityMeasurementApp) obj;
+        return Double.compare(this.feet, other.feet) == 0;
     }
 
     public static void main(String[] args) {
-        QuantityMeasurementApp feet1 = new QuantityMeasurementApp(1.0, Unit.FEET);
-        QuantityMeasurementApp inch1 = new QuantityMeasurementApp(12.0, Unit.INCH);
-        QuantityMeasurementApp inch2 = new QuantityMeasurementApp(1.0, Unit.INCH);
+        QuantityMeasurementApp feet1 = new QuantityMeasurementApp(3.0);
+        QuantityMeasurementApp feet2 = new QuantityMeasurementApp(3.0);
+        QuantityMeasurementApp feet3 = new QuantityMeasurementApp(5.0);
 
-        System.out.println("1 feet == 12 inch: " + feet1.equals(inch1)); // true
-        System.out.println("1 feet == 1 inch: " + feet1.equals(inch2));  // false
+        System.out.println("3 feet == 3 feet: " + feet1.equals(feet2)); // true
+        System.out.println("3 feet == 5 feet: " + feet1.equals(feet3)); // false
+        System.out.println("null check: " + feet1.equals(null));        // false
     }
 }
